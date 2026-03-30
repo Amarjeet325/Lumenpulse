@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -23,6 +24,10 @@ import {
   PortfolioSummaryResponseDto,
 } from './dto/portfolio-snapshot.dto';
 import { PortfolioPerformanceResponseDto } from './dto/portfolio-performance.dto';
+import {
+  getPortfolioReadThrottleOverride,
+  getPortfolioWriteThrottleOverride,
+} from '../common/rate-limit/rate-limit.config';
 
 @ApiTags('portfolio')
 @ApiBearerAuth('JWT-auth')
@@ -32,6 +37,7 @@ export class PortfolioController {
   constructor(private readonly portfolioService: PortfolioService) {}
 
   @Get('summary')
+  @Throttle(getPortfolioReadThrottleOverride())
   @ApiOperation({
     summary: 'Get portfolio summary',
     description:
@@ -52,6 +58,7 @@ export class PortfolioController {
   }
 
   @Get('history')
+  @Throttle(getPortfolioReadThrottleOverride())
   @ApiOperation({
     summary: 'Get portfolio history',
     description:
@@ -79,6 +86,7 @@ export class PortfolioController {
   }
 
   @Post('snapshot')
+  @Throttle(getPortfolioWriteThrottleOverride())
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create portfolio snapshot',
@@ -121,6 +129,7 @@ export class PortfolioController {
   }
 
   @Post('snapshots/trigger')
+  @Throttle(getPortfolioWriteThrottleOverride())
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Trigger snapshot creation for all users (Admin)',
@@ -149,6 +158,7 @@ export class PortfolioController {
   }
 
   @Get('performance')
+  @Throttle(getPortfolioReadThrottleOverride())
   @ApiOperation({
     summary: 'Get portfolio performance',
     description:
@@ -169,6 +179,7 @@ export class PortfolioController {
   }
 
   @Get('allocation')
+  @Throttle(getPortfolioReadThrottleOverride())
   @ApiOperation({
     summary: 'Get portfolio asset allocation',
     description:

@@ -2,7 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
@@ -23,6 +23,14 @@ import { StellarSyncModule } from './stellar-sync/stellar-sync.module';
 import databaseConfig from './database/database.config';
 import stellarConfig from './stellar/config/stellar.config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { RateLimitGuard } from './common/rate-limit/rate-limit.guard';
+import { RateLimitModule } from './common/rate-limit/rate-limit.module';
+import { RateLimitStorageService } from './common/rate-limit/rate-limit.storage';
+import {
+  createThrottlerOptions,
+  getRateLimitSettings,
+} from './common/rate-limit/rate-limit.config';
 import { TestController } from './test/test.controller';
 
 @Module({
@@ -46,12 +54,14 @@ import { TestController } from './test/test.controller';
 
     ScheduleModule.forRoot(),
 
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 100,
-      },
-    ]),
+    RateLimitModule,
+
+    ThrottlerModule.forRootAsync({
+      imports: [RateLimitModule],
+      inject: [RateLimitStorageService],
+      useFactory: (storageService: RateLimitStorageService) =>
+        createThrottlerOptions(getRateLimitSettings(), storageService),
+    }),
 
     AppCacheModule,
     MetricsModule,
@@ -69,12 +79,12 @@ import { TestController } from './test/test.controller';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: RateLimitGuard,
     },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(RequestIdMiddleware, LoggerMiddleware).forRoutes('*');
   }
 }
