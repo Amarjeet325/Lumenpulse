@@ -3,11 +3,12 @@ import { Stack } from 'expo-router';
 import { AuthProvider } from '../contexts/AuthContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { NotificationsProvider } from '../contexts/NotificationsContext';
+import BiometricLockGuard from '../components/BiometricLockGuard';
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
+    <ThemeProvider>
+      <BiometricLockGuard>
         <AuthProvider>
           <NotificationsProvider>
             <Stack screenOptions={{ headerShown: false }}>
@@ -16,7 +17,7 @@ export default function RootLayout() {
             </Stack>
           </NotificationsProvider>
         </AuthProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+      </BiometricLockGuard>
+    </ThemeProvider>
   );
 }
