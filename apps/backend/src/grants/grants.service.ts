@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   RoundDto,
@@ -80,7 +85,9 @@ export class GrantsService {
     if (amount <= 0n) throw new BadRequestException('Amount must be positive');
 
     record.totalPool += amount;
-    this.logger.log(`Round ${dto.roundId} pool funded +${amount} by ${dto.funderPublicKey}`);
+    this.logger.log(
+      `Round ${dto.roundId} pool funded +${amount} by ${dto.funderPublicKey}`,
+    );
     return { roundId: dto.roundId, newBalance: record.totalPool.toString() };
   }
 
@@ -98,7 +105,9 @@ export class GrantsService {
     if (!record.contributions.has(dto.projectId)) {
       record.contributions.set(dto.projectId, new Map());
     }
-    this.logger.log(`Project ${dto.projectId} approved for round ${dto.roundId}`);
+    this.logger.log(
+      `Project ${dto.projectId} approved for round ${dto.roundId}`,
+    );
   }
 
   removeProject(roundId: number, projectId: number): void {
@@ -132,7 +141,8 @@ export class GrantsService {
     const amount = BigInt(dto.amount);
     if (amount <= 0n) throw new BadRequestException('Amount must be positive');
 
-    const projectContribs = record.contributions.get(dto.projectId) ?? new Map<string, bigint>();
+    const projectContribs =
+      record.contributions.get(dto.projectId) ?? new Map<string, bigint>();
     const prev = projectContribs.get(dto.contributorPublicKey) ?? 0n;
     projectContribs.set(dto.contributorPublicKey, prev + amount);
     record.contributions.set(dto.projectId, projectContribs);
@@ -208,7 +218,8 @@ export class GrantsService {
     let totalQf = 0n;
 
     for (const pid of record.eligibleProjects) {
-      const contribs = record.contributions.get(pid) ?? new Map();
+      const contribs =
+        record.contributions.get(pid) ?? new Map<string, bigint>();
       const score = this.computeQfScore(contribs);
       scores.set(pid, score);
       totalQf += score;
@@ -217,9 +228,13 @@ export class GrantsService {
     const projects: ProjectQfDto[] = [];
 
     for (const pid of record.eligibleProjects) {
-      const contribs = record.contributions.get(pid) ?? new Map();
+      const contribs =
+        record.contributions.get(pid) ?? new Map<string, bigint>();
       const score = scores.get(pid) ?? 0n;
-      const totalContribs = [...contribs.values()].reduce((a, b) => a + b, 0n);
+      const totalContribs = [...contribs.values()].reduce(
+        (a: bigint, b: bigint) => a + b,
+        0n,
+      );
 
       const estimatedMatch =
         totalQf > 0n && record.totalPool > 0n
@@ -236,8 +251,8 @@ export class GrantsService {
     }
 
     // Sort by estimated match descending
-    projects.sort(
-      (a, b) => Number(BigInt(b.estimatedMatch) - BigInt(a.estimatedMatch)),
+    projects.sort((a, b) =>
+      Number(BigInt(b.estimatedMatch) - BigInt(a.estimatedMatch)),
     );
 
     return {
@@ -247,13 +262,20 @@ export class GrantsService {
     };
   }
 
-  distribute(dto: DistributeDto): { totalDistributed: string; allocations: { projectId: number; owner: string; amount: string }[] } {
+  distribute(dto: DistributeDto): {
+    totalDistributed: string;
+    allocations: { projectId: number; owner: string; amount: string }[];
+  } {
     const record = this.getRecord(dto.roundId);
     if (!record.isFinalized) {
-      throw new BadRequestException('Round must be finalized before distribution');
+      throw new BadRequestException(
+        'Round must be finalized before distribution',
+      );
     }
     if (record.isDistributed) {
-      throw new BadRequestException('Matching funds already distributed for this round');
+      throw new BadRequestException(
+        'Matching funds already distributed for this round',
+      );
     }
 
     const eligibleList = [...record.eligibleProjects];
@@ -263,13 +285,16 @@ export class GrantsService {
 
     // Compute QF scores
     const scores = eligibleList.map((pid) => {
-      const contribs = record.contributions.get(pid) ?? new Map();
+      const contribs =
+        record.contributions.get(pid) ?? new Map<string, bigint>();
       return { pid, score: this.computeQfScore(contribs) };
     });
 
     const totalQf = scores.reduce((acc, s) => acc + s.score, 0n);
     if (totalQf === 0n) {
-      throw new BadRequestException('No contributions recorded — cannot distribute');
+      throw new BadRequestException(
+        'No contributions recorded — cannot distribute',
+      );
     }
 
     const pool = record.totalPool;
@@ -277,7 +302,8 @@ export class GrantsService {
       throw new BadRequestException('Matching pool is empty');
     }
 
-    const allocations: { projectId: number; owner: string; amount: string }[] = [];
+    const allocations: { projectId: number; owner: string; amount: string }[] =
+      [];
     let remainder = pool;
 
     scores.forEach(({ pid, score }, idx) => {
@@ -285,9 +311,7 @@ export class GrantsService {
       if (!owner) return;
 
       const alloc =
-        idx === scores.length - 1
-          ? remainder
-          : (pool * score) / totalQf;
+        idx === scores.length - 1 ? remainder : (pool * score) / totalQf;
 
       if (idx !== scores.length - 1) remainder -= alloc;
 
