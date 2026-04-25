@@ -3,17 +3,13 @@ import {
   IsString,
   IsBoolean,
   IsOptional,
-  IsArray,
   IsEnum,
   IsInt,
   Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  NotificationChannel,
-  NotificationEventCategory,
-} from '../notification-preference.entity';
+import { NotificationChannel } from '../notification-preference.entity';
 
 export class EventCategoryPreferenceDto {
   @ApiProperty({ description: 'Whether this event category is enabled' })

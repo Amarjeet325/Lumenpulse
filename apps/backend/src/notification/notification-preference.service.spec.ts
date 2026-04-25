@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationPreferenceService } from './notification-preference.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotificationPreference, NotificationChannel } from './notification-preference.entity';
+import {
+  NotificationPreference,
+  NotificationChannel,
+} from './notification-preference.entity';
 
 const mockNotificationPreferenceRepository = {
   findOne: jest.fn(),
@@ -37,7 +40,10 @@ describe('NotificationPreferenceService', () => {
     it('should create new preferences if not exist', async () => {
       const dto = {
         userId: 'user-123',
-        enabledChannels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+        enabledChannels: [
+          NotificationChannel.IN_APP,
+          NotificationChannel.EMAIL,
+        ],
         eventPreferences: {},
         quietHours: null,
         dailyLimit: 50,

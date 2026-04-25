@@ -30,7 +30,7 @@ export class WebhookVerificationService implements OnModuleInit {
     const providersJson = this.configService.get<string>('WEBHOOK_PROVIDERS');
     if (providersJson) {
       try {
-        const providers: WebhookProviderConfig[] = JSON.parse(providersJson);
+        const providers = JSON.parse(providersJson) as WebhookProviderConfig[];
         providers.forEach((config) => {
           this.providers.set(config.name, config);
           this.logger.log(`Loaded webhook provider: ${config.name}`);
@@ -114,7 +114,7 @@ export class WebhookVerificationService implements OnModuleInit {
         default:
           return {
             valid: false,
-            error: `Unsupported algorithm: ${provider.algorithm}`,
+            error: `Unsupported algorithm: ${provider.algorithm as string}`,
             provider: providerName,
           };
       }
@@ -368,6 +368,7 @@ export class WebhookVerificationService implements OnModuleInit {
     if (!provider) return null;
 
     // Return safe info without secrets
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { secret, publicKey, ...safeConfig } = provider;
     return safeConfig;
   }

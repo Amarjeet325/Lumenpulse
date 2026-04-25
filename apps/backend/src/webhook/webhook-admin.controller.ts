@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  UseGuards,
   HttpCode,
   HttpStatus,
   BadRequestException,
@@ -14,6 +13,10 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { WebhookVerificationService } from './webhook-verification.service';
+import {
+  WebhookSignatureAlgorithm,
+  WebhookProviderConfig,
+} from './webhook.types';
 import {
   CreateWebhookProviderDto,
   UpdateWebhookProviderDto,
@@ -109,14 +112,16 @@ export class WebhookAdminController {
     if (
       !dto.secret &&
       !dto.publicKey &&
-      (dto.algorithm === 'hmac-sha256' || dto.algorithm === 'hmac-sha512')
+      (dto.algorithm === WebhookSignatureAlgorithm.HMAC_SHA256 ||
+        dto.algorithm === WebhookSignatureAlgorithm.HMAC_SHA512)
     ) {
       throw new BadRequestException('Secret is required for HMAC algorithms');
     }
 
     if (
       !dto.publicKey &&
-      (dto.algorithm === 'rsa-sha256' || dto.algorithm === 'ed25519')
+      (dto.algorithm === WebhookSignatureAlgorithm.RSA_SHA256 ||
+        dto.algorithm === WebhookSignatureAlgorithm.ED25519)
     ) {
       throw new BadRequestException(
         'Public key is required for RSA/Ed25519 algorithms',
@@ -220,9 +225,17 @@ export class WebhookAdminController {
     }
 
     // Note: This is a runtime-only removal. For persistent storage, implement a database.
-    this.verificationService.registerProvider({
-      ...info,
+    const config: WebhookProviderConfig = {
+      name: info.name!,
+      algorithm: info.algorithm!,
+      secret: info.secret,
+      publicKey: info.publicKey,
       enabled: false,
-    } as any);
+      timestampToleranceMs: info.timestampToleranceMs,
+      signatureHeader: info.signatureHeader,
+      timestampHeader: info.timestampHeader,
+      allowedIps: info.allowedIps,
+    };
+    this.verificationService.registerProvider(config);
   }
 }

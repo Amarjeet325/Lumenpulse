@@ -83,11 +83,7 @@ describe('WebhookVerificationService', () => {
       const payload = '{"event":"test","data":"value"}';
       const rawBody = Buffer.from(payload);
 
-      const result = service.verifySignature(
-        'test-provider',
-        rawBody,
-        '',
-      );
+      const result = service.verifySignature('test-provider', rawBody, '');
 
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Missing signature');

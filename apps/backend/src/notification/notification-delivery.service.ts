@@ -3,11 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationService } from './notification.service';
 import { NotificationPreferenceService } from './notification-preference.service';
-import {
-  NotificationChannel,
-  NotificationPreference,
-} from './notification-preference.entity';
-import { Notification, NotificationSeverity } from './notification.entity';
+import { NotificationChannel } from './notification-preference.entity';
+import { Notification } from './notification.entity';
 import {
   NotificationDeliveryLog,
   DeliveryStatus,
@@ -162,7 +159,7 @@ export class NotificationDeliveryService implements OnModuleInit {
 
         default:
           deliveryLog.status = DeliveryStatus.FAILED;
-          deliveryLog.errorMessage = `Unknown channel: ${channel}`;
+          deliveryLog.errorMessage = `Unknown channel: ${channel as string}`;
       }
     } catch (error) {
       deliveryLog.status = DeliveryStatus.FAILED;
@@ -193,6 +190,7 @@ export class NotificationDeliveryService implements OnModuleInit {
     this.logger.log(
       `In-app notification ${notification.id} delivered to user ${userId}`,
     );
+    await Promise.resolve();
   }
 
   /**
@@ -207,6 +205,7 @@ export class NotificationDeliveryService implements OnModuleInit {
     this.logger.log(
       `Email notification ${notification.id} sent to user ${userId}`,
     );
+    await Promise.resolve();
   }
 
   /**
@@ -249,6 +248,7 @@ export class NotificationDeliveryService implements OnModuleInit {
     this.logger.log(
       `Webhook notification ${notification.id} sent for user ${userId}`,
     );
+    await Promise.resolve();
   }
 
   /**
@@ -263,6 +263,7 @@ export class NotificationDeliveryService implements OnModuleInit {
     this.logger.log(
       `SMS notification ${notification.id} sent to user ${userId}`,
     );
+    await Promise.resolve();
   }
 
   /**

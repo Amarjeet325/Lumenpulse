@@ -1,16 +1,9 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   NotificationPreference,
   NotificationChannel,
-  EventCategoryPreference,
-  QuietHoursConfig,
 } from './notification-preference.entity';
 import {
   CreateNotificationPreferenceDto,
@@ -39,7 +32,14 @@ export class NotificationPreferenceService {
 
     if (preference) {
       // Update existing
-      return this.update(preference.id, dto as any);
+      const updateDto: UpdateNotificationPreferenceDto = {
+        enabledChannels: dto.enabledChannels,
+        eventPreferences: dto.eventPreferences,
+        quietHours: dto.quietHours,
+        dailyLimit: dto.dailyLimit,
+        minSeverity: dto.minSeverity,
+      };
+      return this.update(preference.id, updateDto);
     }
 
     // Create new
