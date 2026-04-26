@@ -13,13 +13,15 @@ export interface MaterializedSnapshotData {
     amount: string;
     valueUsd: number;
   }[];
-  assetAllocation?: {
-    assetCode: string;
-    assetIssuer: string | null;
-    amount: string;
-    valueUsd: number;
-    percentage: number;
-  }[] | null;
+  assetAllocation?:
+    | {
+        assetCode: string;
+        assetIssuer: string | null;
+        amount: string;
+        valueUsd: number;
+        percentage: number;
+      }[]
+    | null;
   hasLinkedAccount: boolean;
   sourceSnapshotId: string;
 }
@@ -41,8 +43,12 @@ export class MaterializedSnapshotService {
    * Uses the unique constraint on userId so that re-running always
    * updates the single existing row rather than creating duplicates.
    */
-  async upsertForUser(data: MaterializedSnapshotData): Promise<PortfolioMaterializedSnapshot> {
-    this.logger.debug(`Upserting materialized snapshot for user ${data.userId}`);
+  async upsertForUser(
+    data: MaterializedSnapshotData,
+  ): Promise<PortfolioMaterializedSnapshot> {
+    this.logger.debug(
+      `Upserting materialized snapshot for user ${data.userId}`,
+    );
 
     const existing = await this.materializedRepo.findOne({
       where: { userId: data.userId },
@@ -51,7 +57,8 @@ export class MaterializedSnapshotService {
     if (existing) {
       existing.totalValueUsd = data.totalValueUsd;
       existing.assetBalances = data.assetBalances;
-      existing.assetAllocation = data.assetAllocation ?? existing.assetAllocation;
+      existing.assetAllocation =
+        data.assetAllocation ?? existing.assetAllocation;
       existing.hasLinkedAccount = data.hasLinkedAccount;
       existing.sourceSnapshotId = data.sourceSnapshotId;
       return this.materializedRepo.save(existing);
@@ -74,7 +81,9 @@ export class MaterializedSnapshotService {
    * Returns null when no materialized row exists — the caller should
    * fall back to computing from raw data in that case.
    */
-  async getForUser(userId: string): Promise<PortfolioMaterializedSnapshot | null> {
+  async getForUser(
+    userId: string,
+  ): Promise<PortfolioMaterializedSnapshot | null> {
     return this.materializedRepo.findOne({
       where: { userId },
     });
@@ -94,7 +103,9 @@ export class MaterializedSnapshotService {
     });
 
     if (!latestSnapshot) {
-      this.logger.debug(`No snapshot found for user ${userId} — skipping refresh`);
+      this.logger.debug(
+        `No snapshot found for user ${userId} — skipping refresh`,
+      );
       return false;
     }
 
@@ -144,7 +155,8 @@ export class MaterializedSnapshotService {
       assetIssuer: asset.assetIssuer,
       amount: asset.amount,
       valueUsd: asset.valueUsd,
-      percentage: totalValueUsd > 0 ? (asset.valueUsd / totalValueUsd) * 100 : 0,
+      percentage:
+        totalValueUsd > 0 ? (asset.valueUsd / totalValueUsd) * 100 : 0,
     }));
   }
 }

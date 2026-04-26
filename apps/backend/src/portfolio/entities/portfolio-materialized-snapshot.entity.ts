@@ -44,13 +44,15 @@ export class PortfolioMaterializedSnapshot {
 
   /** Pre-computed asset allocation with percentages. */
   @Column({ type: 'jsonb', nullable: true })
-  assetAllocation: {
-    assetCode: string;
-    assetIssuer: string | null;
-    amount: string;
-    valueUsd: number;
-    percentage: number;
-  }[] | null;
+  assetAllocation:
+    | {
+        assetCode: string;
+        assetIssuer: string | null;
+        amount: string;
+        valueUsd: number;
+        percentage: number;
+      }[]
+    | null;
 
   /** Whether the user has at least one linked Stellar account. */
   @Column({ type: 'boolean', default: false })

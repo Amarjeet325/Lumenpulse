@@ -27,7 +27,12 @@ import { MaterializedSnapshotService } from './materialized-snapshot.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PortfolioAsset, PortfolioSnapshot, PortfolioMaterializedSnapshot, User]),
+    TypeOrmModule.forFeature([
+      PortfolioAsset,
+      PortfolioSnapshot,
+      PortfolioMaterializedSnapshot,
+      User,
+    ]),
     MetricsModule,
     ExchangeRatesModule,
     StellarModule,
@@ -67,6 +72,11 @@ import { MaterializedSnapshotService } from './materialized-snapshot.service';
       inject: [PORTFOLIO_SNAPSHOT_CONNECTION],
     },
   ],
-  exports: [PortfolioService, MaterializedSnapshotService, PortfolioSnapshotQueueService, TypeOrmModule],
+  exports: [
+    PortfolioService,
+    MaterializedSnapshotService,
+    PortfolioSnapshotQueueService,
+    TypeOrmModule,
+  ],
 })
 export class PortfolioModule {}
