@@ -40,11 +40,7 @@ impl ContributorRegistryContract {
 
     fn registration_nonce_of(env: &Env, address: &Address) -> u64 {
         let key = DataKey::RegistrationNonce(address.clone());
-        let nonce = env
-            .storage()
-            .persistent()
-            .get(&key)
-            .unwrap_or(0);
+        let nonce = env.storage().persistent().get(&key).unwrap_or(0);
         if env.storage().persistent().has(&key) {
             env.storage()
                 .persistent()
@@ -80,15 +76,19 @@ impl ContributorRegistryContract {
         env.storage()
             .persistent()
             .set(&DataKey::Contributor(address.clone()), &contributor);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Contributor(address.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Contributor(address.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
         env.storage()
             .persistent()
             .set(&DataKey::GitHubIndex(github_handle.clone()), address);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::GitHubIndex(github_handle.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::GitHubIndex(github_handle.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         Ok(())
     }
@@ -285,9 +285,11 @@ impl ContributorRegistryContract {
         env.storage()
             .persistent()
             .set(&DataKey::RegistrationNonce(address.clone()), &new_nonce);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::RegistrationNonce(address.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::RegistrationNonce(address.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         GaslessRegistrationEvent {
             contributor: address,
@@ -319,9 +321,11 @@ impl ContributorRegistryContract {
             .persistent()
             .get(&DataKey::Contributor(address.clone()))
             .ok_or(ContributorError::ContributorNotFound)?;
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Contributor(address.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Contributor(address.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         Self::ensure_github_handle_available(&env, &github_handle, &address)?;
         if contributor.github_handle != github_handle {
@@ -333,15 +337,19 @@ impl ContributorRegistryContract {
         env.storage()
             .persistent()
             .set(&DataKey::Contributor(address.clone()), &contributor);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Contributor(address.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Contributor(address.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
         env.storage()
             .persistent()
             .set(&DataKey::GitHubIndex(github_handle.clone()), &address);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::GitHubIndex(github_handle), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::GitHubIndex(github_handle),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
         Ok(())
     }
 
@@ -353,10 +361,7 @@ impl ContributorRegistryContract {
     /// - `DataKey::RegistrationNonce(address)`
     ///
     /// This prevents orphaned index entries and reclaims rent.
-    pub fn deregister_contributor(
-        env: Env,
-        address: Address,
-    ) -> Result<(), ContributorError> {
+    pub fn deregister_contributor(env: Env, address: Address) -> Result<(), ContributorError> {
         Self::ensure_initialized(&env)?;
         address.require_auth();
 
@@ -401,9 +406,11 @@ impl ContributorRegistryContract {
             .persistent()
             .get(&DataKey::Contributor(contributor_address.clone()))
             .ok_or(ContributorError::ContributorNotFound)?;
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Contributor(contributor_address.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Contributor(contributor_address.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         let new_score = if delta > 0 {
             contributor
@@ -415,12 +422,15 @@ impl ContributorRegistryContract {
             contributor.reputation_score.saturating_sub(abs)
         };
         contributor.reputation_score = new_score;
-        env.storage()
-            .persistent()
-            .set(&DataKey::Contributor(contributor_address.clone()), &contributor);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Contributor(contributor_address), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().set(
+            &DataKey::Contributor(contributor_address.clone()),
+            &contributor,
+        );
+        env.storage().persistent().extend_ttl(
+            &DataKey::Contributor(contributor_address),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
         Ok(())
     }
 
@@ -445,9 +455,7 @@ impl ContributorRegistryContract {
 
         if !badges.contains(badge) {
             badges.push_back(badge);
-            env.storage()
-                .persistent()
-                .set(&key, &badges);
+            env.storage().persistent().set(&key, &badges);
             env.storage()
                 .persistent()
                 .extend_ttl(&key, LEDGER_THRESHOLD, LEDGER_BUMP);
@@ -484,9 +492,7 @@ impl ContributorRegistryContract {
 
         if let Some(index) = badges.first_index_of(badge) {
             badges.remove(index);
-            env.storage()
-                .persistent()
-                .set(&key, &badges);
+            env.storage().persistent().set(&key, &badges);
             if !badges.is_empty() {
                 env.storage()
                     .persistent()
@@ -636,7 +642,6 @@ impl ContributorRegistryContract {
             .get(&DataKey::NextProposalId)
             .unwrap_or(0)
     }
-
 }
 
 // ── Notification receiver ─────────────────────────────────────
@@ -649,18 +654,14 @@ impl NotificationReceiverTrait for ContributorRegistryContract {
                 <(Address, u64, i128)>::from_xdr(&env, &notification.data).unwrap();
 
             let key = DataKey::Contributor(user.clone());
-            if let Some(mut contributor) = env
-                .storage()
-                .persistent()
-                .get::<_, ContributorData>(&key)
+            if let Some(mut contributor) =
+                env.storage().persistent().get::<_, ContributorData>(&key)
             {
                 env.storage()
                     .persistent()
                     .extend_ttl(&key, LEDGER_THRESHOLD, LEDGER_BUMP);
                 contributor.reputation_score = contributor.reputation_score.saturating_add(1);
-                env.storage()
-                    .persistent()
-                    .set(&key, &contributor);
+                env.storage().persistent().set(&key, &contributor);
                 env.storage()
                     .persistent()
                     .extend_ttl(&key, LEDGER_THRESHOLD, LEDGER_BUMP);

@@ -2,7 +2,10 @@
 extern crate std;
 
 use crate::{LumenToken, LumenTokenClient};
-use soroban_sdk::{testutils::{Address as _, Ledger}, Address, BytesN, Env, String};
+use soroban_sdk::{
+    testutils::{Address as _, Ledger},
+    Address, BytesN, Env, String,
+};
 
 #[test]
 fn test_token() {

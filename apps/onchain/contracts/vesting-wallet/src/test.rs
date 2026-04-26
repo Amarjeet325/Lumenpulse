@@ -713,5 +713,8 @@ fn test_vesting_entry_removed_after_full_claim() {
 
     // The vesting entry must have been removed — get_vesting should now fail.
     let result = client.try_get_vesting(&beneficiary);
-    assert_eq!(result, Err(Ok(crate::errors::VestingError::VestingNotFound)));
+    assert_eq!(
+        result,
+        Err(Ok(crate::errors::VestingError::VestingNotFound))
+    );
 }

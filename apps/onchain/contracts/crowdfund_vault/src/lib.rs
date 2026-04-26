@@ -13,7 +13,9 @@ use notification_interface::{Notification, NotificationReceiverClient};
 use soroban_sdk::token::TokenClient;
 use soroban_sdk::xdr::ToXdr;
 use soroban_sdk::{contract, contractimpl, vec, Address, BytesN, Env, Symbol, Vec};
-use storage::{DataKey, MilestoneDispute, ProjectData, ProtocolStats, LEDGER_BUMP, LEDGER_THRESHOLD};
+use storage::{
+    DataKey, MilestoneDispute, ProjectData, ProtocolStats, LEDGER_BUMP, LEDGER_THRESHOLD,
+};
 
 const CURRENT_STORAGE_VERSION: u32 = 1;
 const DEFAULT_MILESTONE_EXPIRY_SECONDS: u64 = 30 * 24 * 60 * 60;
@@ -293,9 +295,11 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::Project(project_id), &project);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Project(project_id), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Project(project_id),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Initialize project balance (construct key once and reuse)
         let balance_key = DataKey::ProjectBalance(project_id, token_address.clone());
@@ -308,9 +312,11 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::MilestoneApproved(project_id, 0), &false);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::MilestoneApproved(project_id, 0), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::MilestoneApproved(project_id, 0),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
         let expiry_key = DataKey::ProjectMilestoneExpiry(project_id);
         env.storage().persistent().set(
             &expiry_key,
@@ -322,9 +328,11 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::ProjectRefundWindowDeadline(project_id), &0u64);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::ProjectRefundWindowDeadline(project_id), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::ProjectRefundWindowDeadline(project_id),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Increment project ID counter
         env.storage()
@@ -641,9 +649,7 @@ impl CrowdfundVaultContract {
 
             // Store contributor at index
             let contrib_idx_key = DataKey::Contributor(project_id, contributor_count);
-            env.storage()
-                .persistent()
-                .set(&contrib_idx_key, &user);
+            env.storage().persistent().set(&contrib_idx_key, &user);
             env.storage()
                 .persistent()
                 .extend_ttl(&contrib_idx_key, LEDGER_THRESHOLD, LEDGER_BUMP);
@@ -652,9 +658,11 @@ impl CrowdfundVaultContract {
             env.storage()
                 .persistent()
                 .set(&contributor_count_key, &(contributor_count + 1));
-            env.storage()
-                .persistent()
-                .extend_ttl(&contributor_count_key, LEDGER_THRESHOLD, LEDGER_BUMP);
+            env.storage().persistent().extend_ttl(
+                &contributor_count_key,
+                LEDGER_THRESHOLD,
+                LEDGER_BUMP,
+            );
         }
 
         // Update contribution amount
@@ -670,9 +678,11 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::Project(project_id), &project);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Project(project_id), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Project(project_id),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Update global protocol stats
         let mut stats: ProtocolStats = env
@@ -1125,9 +1135,11 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::Project(project_id), &project);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Project(project_id), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Project(project_id),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
         let expiry_key = DataKey::ProjectMilestoneExpiry(project_id);
         env.storage().persistent().set(
             &expiry_key,
@@ -1291,17 +1303,21 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::RegisteredContributor(contributor.clone()), &true);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::RegisteredContributor(contributor.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::RegisteredContributor(contributor.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Initialize reputation
         env.storage()
             .persistent()
             .set(&DataKey::Reputation(contributor.clone()), &0i128);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Reputation(contributor.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Reputation(contributor.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Emit registration event
         events::ContributorRegisteredEvent { contributor }.publish(&env);
@@ -1340,9 +1356,11 @@ impl CrowdfundVaultContract {
         env.storage()
             .persistent()
             .set(&DataKey::Reputation(contributor.clone()), &new_reputation);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Reputation(contributor.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Reputation(contributor.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Emit reputation change event
         events::ReputationUpdatedEvent {

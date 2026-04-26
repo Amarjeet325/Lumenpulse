@@ -118,9 +118,11 @@ impl VestingWalletContract {
             .persistent()
             .get::<_, VestingData>(&DataKey::Vesting(beneficiary.clone()))
         {
-            env.storage()
-                .persistent()
-                .extend_ttl(&DataKey::Vesting(beneficiary.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+            env.storage().persistent().extend_ttl(
+                &DataKey::Vesting(beneficiary.clone()),
+                LEDGER_THRESHOLD,
+                LEDGER_BUMP,
+            );
             let remaining = existing_vesting.total_amount - existing_vesting.claimed_amount;
             if remaining > 0 {
                 transfer(&env, &token, &contract_address, &admin, &remaining);
@@ -143,9 +145,11 @@ impl VestingWalletContract {
         env.storage()
             .persistent()
             .set(&DataKey::Vesting(beneficiary.clone()), &vesting);
-        env.storage()
-            .persistent()
-            .extend_ttl(&DataKey::Vesting(beneficiary.clone()), LEDGER_THRESHOLD, LEDGER_BUMP);
+        env.storage().persistent().extend_ttl(
+            &DataKey::Vesting(beneficiary.clone()),
+            LEDGER_THRESHOLD,
+            LEDGER_BUMP,
+        );
 
         // Emit VestingCreated event
         events::VestingCreatedEvent {
@@ -223,9 +227,7 @@ impl VestingWalletContract {
             // State compaction: remove the entry once fully claimed to reclaim rent.
             env.storage().persistent().remove(&vesting_key);
         } else {
-            env.storage()
-                .persistent()
-                .set(&vesting_key, &vesting);
+            env.storage().persistent().set(&vesting_key, &vesting);
             env.storage()
                 .persistent()
                 .extend_ttl(&vesting_key, LEDGER_THRESHOLD, LEDGER_BUMP);
